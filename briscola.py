@@ -7,8 +7,9 @@ class Card:
         self.value = value
 
 class Player:
-    def __init__(self, name, hand, inventory):
+    def __init__(self, name, turn, hand, inventory):
         self.name = name
+        self.turn = turn
         self.hand = hand
         self.inventory = inventory
 
@@ -35,10 +36,16 @@ def get_hand_winner(cards, briscola):
     elif cards[0].seed != briscola.seed and cards[1].seed == briscola.seed:
         return 1
 
+def get_turn(result, players):
+    players[0].turn = result
+    players[1].turn = 1 - result
+
 players = ['', '']
 
+print("Pybriscola, di Fritzky (24/07/2024)\nhttps://github.com/fritzkyy/bybriscola\n")
+
 for i in range(len(players)):
-    players[i] = Player(input(f"Nome giocatore {i + 1}: "), [], [])
+    players[i] = Player(input(f"Nome giocatore {i + 1}: "), i, [], [])
 
 seeds = ['denari', 'coppe', 'spade', 'bastoni']
 numbers = ['asso', '2', '3', '4', '5', '6', '7', 'donna', 'cavallo', 're']
@@ -54,21 +61,22 @@ random.shuffle(deck)
 briscola = deck[-1]
 print(f"\n\nBriscola: {briscola.number} di {briscola.seed}\n")
 
-for p in players:
-    print(f"{p.name}:")
-    for j in range(3):
-        p.hand.append(deck[0])
-        print(f"{deck[0].number} di {deck[0].seed}")
-        deck.remove(deck[0])
-
 while len(deck) > 0:
     for p in players:
-        print(f"{p.name}:")
+        if p.hand == []:
+            print(f"{p.name}:")
+            for j in range(3):
+                p.hand.append(deck[0])
+                print(f"{deck[0].number} di {deck[0].seed}")
+                deck.remove(deck[0])
+        else:
+            if p.turn == get_turn(get_hand_winner, players):
+                print(f"{p.name}:")
 
         for c in p.hand:
             print(f"{c.number} di {c.seed} (valore: {c.value})")
 
-        play = 0
+            play = 0
 
         while True:
             try:
@@ -88,6 +96,3 @@ while len(deck) > 0:
         if len(ground) == 2:
             print(f"Vince la presa {players[get_hand_winner(ground, briscola)].name}")
             ground = []
-
-        if get_hand_winner == 1:
-            pass
